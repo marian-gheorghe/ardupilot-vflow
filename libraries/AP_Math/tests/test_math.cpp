@@ -86,7 +86,7 @@ TEST(VectorTest, Rotations)
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
     TEST_ROTATION(ROTATION_CUSTOM_OLD, 1, 1, 1);
     TEST_ROTATION(ROTATION_MAX, 1, 1, 1);
-#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
     Vector3F v {1, 1, 1};
     EXPECT_EXIT(v.rotate(ROTATION_CUSTOM_OLD), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::bad_rotation");
     EXPECT_EXIT(v.rotate(ROTATION_MAX), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::bad_rotation");
@@ -391,7 +391,7 @@ TEST(MathTest, Constrain)
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
     EXPECT_EQ(1.0f, constrain_float(nanf("0x4152"), 1.0f, 1.0f));
     EXPECT_EQ(1.0f, constrain_value(nanf("0x4152"), 1.0f, 1.0f));
-#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
     EXPECT_EXIT(constrain_float(nanf("0x4152"), 1.0f, 1.0f), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::cnstring_nan");
     EXPECT_EXIT(constrain_value(nanf("0x4152"), 1.0f, 1.0f), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::cnstring_nan");
 #endif

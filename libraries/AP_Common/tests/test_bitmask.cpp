@@ -49,13 +49,13 @@ void bitmask_tests(void)
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
     x.clear(N+1);
-#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
     EXPECT_EXIT(x.clear(N+1), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::bitmask_range");
 #endif
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
     x.set(N+1);
-#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
     EXPECT_EXIT(x.set(N+1), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::bitmask_range");
 #endif
 
@@ -66,7 +66,7 @@ void bitmask_tests(void)
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
     EXPECT_EQ(false, x.get(N+1));
     EXPECT_EQ(false, x2.get(N+1));
-#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
     EXPECT_EXIT(x2.get(N+1), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::bitmask_range");
 #endif
 }

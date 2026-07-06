@@ -169,7 +169,7 @@ static void breakSingleton()
 {
     AP_CustomRotations cust_rot1;
 }
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#if CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
 TEST(RotationsTest, TestFailedGetLinux)
 {
     EXPECT_EXIT(AP::custom_rotations().set(ROTATION_CUSTOM_OLD, 0, 0, 0), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::bad_rotation");

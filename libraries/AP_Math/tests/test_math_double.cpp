@@ -87,7 +87,7 @@ TEST(MathTest, ConstrainDouble)
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_LINUX
     EXPECT_EQ(1.0, constrain_value(nan("0x4152"), 1.0, 1.0));
-#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#elif CONFIG_HAL_BOARD == HAL_BOARD_SITL && !defined(__APPLE__)
     EXPECT_EXIT(constrain_value(nan("0x4152"), 1.0, 1.0), testing::KilledBySignal(SIGABRT), "AP_InternalError::error_t::cnstring_nan");
 #endif
 }

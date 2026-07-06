@@ -105,5 +105,70 @@ help:
 	@echo "come to be necessary. Ex: make linux WAF_FLAGS='-c no'"
 	@echo ""
 
+	@echo "SITL Dev Shortcuts"
+	@echo "------------------"
+	@echo ""
+	@echo "Convenience targets for local ArduCopter SITL development:"
+	@echo "    make setup      Install Python deps, restore MAVLink headers, configure sitl"
+	@echo "    make build      Build ArduCopter SITL (auto-configures if needed)"
+	@echo "    make test       Run the unit-test suite (waf check)"
+	@echo "    make sitl       Launch SITL (MAVProxy Option 2; listens on TCP 5760)"
+	@echo "    make mavproxy   Connect MAVProxy to a running SITL"
+	@echo "    make fly        Self-contained smoke test: SITL + arm + takeoff 10m"
+	@echo "    make stop       Kill running SITL / MAVProxy processes"
+	@echo "    make distclean  Remove all build artifacts (all boards)"
+	@echo ""
+
+# ---------------------------------------------------------------------------
+# SITL development convenience targets (see 'make help').
+# BOARD/vehicle default to sitl/copter; override BOARD=... if needed.
+# ---------------------------------------------------------------------------
+BOARD ?= sitl
+PYTHON ?= python3
+SITL_MASTER ?= tcp:127.0.0.1:5760
+SITL_OUT ?= tcpin:0.0.0.0:5760
+SETUP_PKGS = empy==3.3.4 pexpect future MAVProxy pymavlink dronecan gnureadline
+
+.PHONY: setup build test sitl mavproxy fly stop distclean
+
+setup:
+	@echo ">> Installing Python dependencies ..."
+	@$(PYTHON) -m pip install $(SETUP_PKGS) \
+		|| $(PYTHON) -m pip install --break-system-packages $(SETUP_PKGS)
+	@echo ">> Restoring gitignored MAVLink fixed C headers (needed by mavgen) ..."
+	@PYMAVLINK_C=$$($(PYTHON) -c "import pymavlink, os; print(os.path.join(os.path.dirname(pymavlink.__file__), 'generator', 'C'))"); \
+		DST="$(ROOT)/modules/mavlink/pymavlink/generator/C"; \
+		mkdir -p "$$DST"; \
+		cp -R "$$PYMAVLINK_C/." "$$DST/"; \
+		echo "   restored: $$(ls "$$DST"/include_v2.0 | tr '\n' ' ')"
+	@echo ">> Configuring waf for board $(BOARD) ..."
+	@$(WAF) configure --board $(BOARD)
+	@echo ">> Setup complete. Run 'make build'."
+
+build: $(WAF_BINARY)
+	@test -f "$(ROOT)/build/c4che/_cache.py" || $(WAF) configure --board $(BOARD)
+	@$(WAF) copter
+
+test: $(WAF_BINARY)
+	@$(WAF) check
+
+sitl:
+	@$(ROOT)/Tools/autotest/sim_vehicle.py -v ArduCopter --no-mavproxy --out=$(SITL_OUT)
+
+mavproxy:
+	@mavproxy.py --master=$(SITL_MASTER)
+
+fly: $(WAF_BINARY)
+	@$(PYTHON) $(ROOT)/Tools/sitl_smoke_test.py
+
+stop:
+	-@pkill -f sim_vehicle.py 2>/dev/null || true
+	-@pkill -f mavproxy.py 2>/dev/null || true
+	-@pkill -9 arducopter 2>/dev/null || true
+	@echo ">> Stopped SITL / MAVProxy."
+
+distclean: $(WAF_BINARY)
+	@$(WAF) distclean
+
 # Don't run in parallel, let waf take care of that.
 .NOTPARALLEL:

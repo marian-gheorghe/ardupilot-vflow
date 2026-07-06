@@ -25,6 +25,24 @@ It has been under development since 2010 by a diverse team of professional engin
 Our autopilot software is capable of controlling almost any vehicle system imaginable, from conventional airplanes, quad planes, multi-rotors, and helicopters to rovers, boats, balance bots, and even submarines.
 It is continually being expanded to provide support for new emerging vehicle types.
 
+## Quick Start (SITL) ##
+
+The repository ships `make` shortcuts for building and running ArduCopter in the
+SITL (Software-in-the-Loop) simulator with no manual dependency wrangling:
+
+```bash
+make setup    # install Python deps, restore MAVLink headers, configure sitl
+make build    # build ArduCopter SITL
+make test     # run the unit-test suite
+make fly      # self-contained smoke test: boot SITL, arm, take off, assert, tear down
+make sitl     # launch SITL (connect a GCS on TCP 127.0.0.1:5760)
+make mavproxy # attach MAVProxy to a running SITL
+make stop     # stop SITL / MAVProxy
+```
+
+Run `make help` for the full list. For the complete SITL guide (GCS options,
+flight commands, troubleshooting) see **[SITL.md](SITL.md)**.
+
 ## The ArduPilot project is made up of
 
 - ArduCopter: [code](https://github.com/ArduPilot/ardupilot/tree/master/ArduCopter), [wiki](https://ardupilot.org/copter/index.html)
