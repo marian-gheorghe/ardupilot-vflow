@@ -38,6 +38,9 @@ make fly      # self-contained smoke test: boot SITL, arm, take off, assert, tea
 make sitl     # launch SITL (connect a GCS on TCP 127.0.0.1:5760)
 make mavproxy # attach MAVProxy to a running SITL
 make stop     # stop SITL / MAVProxy
+
+make setup-gui # one-time: install MAVProxy console/map deps (wxPython, pygame, opencv, ...)
+make sitl-gui  # launch SITL with the MAVProxy console + map windows
 ```
 
 Run `make help` for the full list. For the complete SITL guide (GCS options,

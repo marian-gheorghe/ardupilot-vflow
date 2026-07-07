@@ -110,9 +110,11 @@ help:
 	@echo ""
 	@echo "Convenience targets for local ArduCopter SITL development:"
 	@echo "    make setup      Install Python deps, restore MAVLink headers, configure sitl"
+	@echo "    make setup-gui  Install MAVProxy console/map deps (wxPython, pygame, matplotlib, opencv)"
 	@echo "    make build      Build ArduCopter SITL (auto-configures if needed)"
 	@echo "    make test       Run the unit-test suite (waf check)"
 	@echo "    make sitl       Launch SITL (MAVProxy Option 2; listens on TCP 5760)"
+	@echo "    make sitl-gui   Launch SITL with MAVProxy console + map (needs 'make setup-gui')"
 	@echo "    make mavproxy   Connect MAVProxy to a running SITL"
 	@echo "    make fly        Self-contained smoke test: SITL + arm + takeoff 10m"
 	@echo "    make stop       Kill running SITL / MAVProxy processes"
@@ -128,8 +130,15 @@ PYTHON ?= python3
 SITL_MASTER ?= tcp:127.0.0.1:5760
 SITL_OUT ?= tcpin:0.0.0.0:5760
 SETUP_PKGS = empy==3.3.4 pexpect future MAVProxy pymavlink dronecan gnureadline
+# Extra deps for MAVProxy's console (wxPython) and map (pygame, matplotlib,
+# opencv-python) modules. Kept out of `setup` because wxPython can be a slow
+# source build.
+VIZ_PKGS = pygame matplotlib wxPython opencv-python
+# MAVProxy modules launched by `make sitl-gui`; override to taste,
+# e.g. `make sitl-gui GUI_MODULES=--map`.
+GUI_MODULES ?= --console --map
 
-.PHONY: setup build test sitl mavproxy fly stop distclean
+.PHONY: setup setup-gui build test sitl sitl-gui mavproxy fly stop distclean
 
 setup:
 	@echo ">> Installing Python dependencies ..."
@@ -145,6 +154,12 @@ setup:
 	@$(WAF) configure --board $(BOARD)
 	@echo ">> Setup complete. Run 'make build'."
 
+setup-gui:
+	@echo ">> Installing MAVProxy console/map deps ($(VIZ_PKGS)) ..."
+	@$(PYTHON) -m pip install $(VIZ_PKGS) \
+		|| $(PYTHON) -m pip install --break-system-packages $(VIZ_PKGS)
+	@echo ">> GUI deps installed. Run 'make sitl-gui'."
+
 build: $(WAF_BINARY)
 	@test -f "$(ROOT)/build/c4che/_cache.py" || $(WAF) configure --board $(BOARD)
 	@$(WAF) copter
@@ -154,6 +169,9 @@ test: $(WAF_BINARY)
 
 sitl:
 	@$(ROOT)/Tools/autotest/sim_vehicle.py -v ArduCopter --no-mavproxy --out=$(SITL_OUT)
+
+sitl-gui:
+	@$(ROOT)/Tools/autotest/sim_vehicle.py -v ArduCopter $(GUI_MODULES)
 
 mavproxy:
 	@mavproxy.py --master=$(SITL_MASTER)
