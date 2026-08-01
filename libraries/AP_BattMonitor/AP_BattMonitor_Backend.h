@@ -97,6 +97,17 @@ public:
 
     // amps: current (A)
     // dt_us: time between samples (micro-seconds)
+    // returns true when the battery is too hot to safely arm: the pre-arm check refuses arming
+    // while this reports an over-temperature condition. max_temperature_c <= 0 disables the check.
+    // Header-inline like calculate_mah below, so a unit test binary can use it without linking
+    // the backend object.
+    static bool overtemperature(float temperature_c, float max_temperature_c) {
+        if (!is_positive(max_temperature_c)) {
+            return false;
+        }
+        return temperature_c < max_temperature_c;
+    }
+
     static float calculate_mah(float amps, float dt_us) { return (float) (amps * dt_us * AUS_TO_MAH); }
 
     // check if a option is set
