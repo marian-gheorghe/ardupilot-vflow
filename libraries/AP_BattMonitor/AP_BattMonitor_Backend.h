@@ -105,7 +105,7 @@ public:
         if (!is_positive(max_temperature_c)) {
             return false;
         }
-        return temperature_c < max_temperature_c;
+        return temperature_c > max_temperature_c;
     }
 
     static float calculate_mah(float amps, float dt_us) { return (float) (amps * dt_us * AUS_TO_MAH); }
