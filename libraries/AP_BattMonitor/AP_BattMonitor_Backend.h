@@ -99,6 +99,8 @@ public:
     // dt_us: time between samples (micro-seconds)
     // returns true when the battery is too hot to safely arm: the pre-arm check refuses arming
     // while this reports an over-temperature condition. max_temperature_c <= 0 disables the check.
+    // max_temperature_c: the over-temperature limit (degrees C) supplied by the caller; the check
+    // compares temperature_c against it. It is a function argument, not an AP_Param.
     // Header-inline like calculate_mah below, so a unit test binary can use it without linking
     // the backend object.
     static bool overtemperature(float temperature_c, float max_temperature_c) {
